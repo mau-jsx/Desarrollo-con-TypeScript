@@ -1,4 +1,3 @@
-// src/services/equipo.service.ts
 import Equipo, { IEquipo } from "../models/equipo";
 import User, { IUser } from "../models/usuario";
 
@@ -20,6 +19,25 @@ export const createEquipo = async (
   if (!user) throw new Error("Responsable no encontrado");
 
   const equipo = new Equipo({ ...data, responsable: responsableId });
+  return await equipo.save();
+};
+
+export const updateEquipo = async (
+  id: string,
+  updateData: Partial<IEquipo>,
+  userId: string,
+  rol: string
+) => {
+  const equipo = await Equipo.findById(id);
+  if (!equipo) throw new Error("Equipo no encontrado");
+
+  if (rol !== "admin" && equipo.responsable.toString() !== userId) {
+    throw new Error("No tienes permiso para modificar este equipo");
+  }
+  if (rol !== "admin" && updateData.responsable) {
+    throw new Error("No puedes cambiar el responsable del equipo");
+  }
+  Object.assign(equipo, updateData);
   return await equipo.save();
 };
 
