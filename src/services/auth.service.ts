@@ -1,8 +1,7 @@
 import User from "../models/usuario";
+import { JWT_SECRET } from "../config/env";
 import { compare } from "bcrypt";
-import { sign } from "jsonwebtoken";
-
-const JWT_SECRET = process.env.JWT_SECRET || "tu_secreto";
+import * as jwt from "jsonwebtoken";
 
 export const login = async (email: string, password: string) => {
   const user = await User.findOne({ email });
@@ -11,8 +10,12 @@ export const login = async (email: string, password: string) => {
   const isValid = await compare(password, user.password);
   if (!isValid) throw new Error("Credenciales inválidas");
 
-  const token = sign(
-    { id: user._id, email: user.email, rol: user.rol },
+  if (!JWT_SECRET) {
+    throw new Error("JWT_SECRET no está definido en .env");
+  }
+
+  const token = jwt.sign(
+    { id: user._id.toString(), email: user.email, rol: user.rol },
     JWT_SECRET,
     { expiresIn: "1d" }
   );
@@ -20,7 +23,7 @@ export const login = async (email: string, password: string) => {
   return {
     token,
     user: {
-      id: user._id,
+      id: user._id.toString(),
       nombre: user.nombre,
       email: user.email,
       rol: user.rol,
@@ -40,5 +43,10 @@ export const register = async (
   const newUser = new User({ nombre, email, password, rol });
   await newUser.save();
 
-  return { id: newUser._id, nombre, email, rol };
+  return {
+    id: newUser._id.toString(), // 👈 También string
+    nombre,
+    email,
+    rol,
+  };
 };

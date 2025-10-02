@@ -1,4 +1,3 @@
-// src/controllers/equipo.controller.ts
 import { Request, Response } from "express";
 import {
   getEquipos,

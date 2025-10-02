@@ -1,4 +1,3 @@
-// src/routes/auth.routes.ts
 import { Router } from "express";
 import {
   loginController,
@@ -11,6 +10,6 @@ const router = Router();
 
 router.post("/login", loginController);
 
-router.post("/register", registerController);
+router.post("/register", authMiddleware, adminMiddleware, registerController);
 
 export default router;
