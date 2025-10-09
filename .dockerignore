@@ -1,0 +1,15 @@
+# Dependencias
+node_modules
+
+# Archivos de Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Archivos de Git
+.git
+.gitignore
+
+# Logs y otros
+npm-debug.log
+README.md

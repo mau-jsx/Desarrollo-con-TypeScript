@@ -1,0 +1,42 @@
+# Versión de la sintaxis de Docker Compose
+version: "3.8"
+
+# Definición de los servicios (contenedores)
+services:
+  # Servicio para tu aplicación Node.js
+  api:
+    build: .
+    container_name: formotex_api_dev
+    ports:
+      # Expone el puerto 3000 de tu app al puerto 3000 de tu máquina
+      - "3000:3000"
+    volumes:
+      # Sincroniza tu código local con el del contenedor para el hot-reload
+      - .:/app
+      - /app/node_modules
+    environment:
+      # AQUI ESTÁ LA MAGIA: Sobrescribimos la variable de entorno MONGO_URI
+      # para que apunte al servicio 'mongo' dentro de la red de Docker.
+      # Docker se encarga de que el nombre 'mongo' se resuelva a la IP del contenedor de la BD.
+      - MONGO_URI=mongodb://mongo:27017/formotex_inventario
+      - PORT=3000
+      - JWT_SECRET=${JWT_SECRET} # Toma el valor del .env local
+    depends_on:
+      # Le dice a este servicio que no inicie hasta que el servicio 'mongo' esté listo
+      - mongo
+
+  # Servicio para la base de datos MongoDB
+  mongo:
+    image: mongo:6
+    container_name: formotex_db_dev
+    ports:
+      # Expone el puerto de MongoDB por si quieres conectarte con un cliente como MongoDB Compass
+      - "27017:27017"
+    volumes:
+      # Crea un volumen para que los datos de la base de datos persistan
+      # incluso si apagas y eliminas los contenedores.
+      - mongo-data:/data/db
+
+# Definición de los volúmenes nombrados
+volumes:
+  mongo-data:
